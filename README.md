@@ -25,13 +25,49 @@ The top level accepts exactly one statement (which may itself be an `if`/`while`
 
 Pass `--eval` to additionally run the tree-walking interpreter, which executes the AST, maintains a variable symbol table, and prints each assignment as it happens. Referencing a variable before it's assigned is a runtime error (reported with line/column, no crash).
 
-## Building
+## Prerequisites
 
-Requires `gcc` and `make` (or `mingw32-make` on Windows).
+Requires a C compiler (`gcc`) and `make`. If you don't already have them:
+
+**Ubuntu / Debian**
+```bash
+sudo apt update
+sudo apt install build-essential
+```
+
+**macOS**
+```bash
+xcode-select --install
+```
+(Installs Apple's Command Line Tools — `clang` aliased as `gcc`, plus `make`.)
+
+**Windows**
+
+No compiler ships with Windows. Pick one:
+
+- Git Bash / MSYS2 shell available:
+  ```bash
+  pacman -S mingw-w64-x86_64-gcc make
+  ```
+- PowerShell only, via [winget](https://learn.microsoft.com/windows/package-manager/winget/):
+  ```powershell
+  winget install -e --id BrechtSanders.WinLibs.POSIX.UCRT
+  ```
+  Add the installed `mingw64\bin` folder to PATH, then restart PowerShell.
+- PowerShell only, via [Chocolatey](https://chocolatey.org/):
+  ```powershell
+  choco install mingw -y
+  ```
+
+Verify with `gcc --version` and `make --version` (or `mingw32-make --version` on Windows).
+
+## Building
 
 ```bash
 make
 ```
+
+On Windows without MSYS2's `make`, use `mingw32-make` instead.
 
 Produces `compilerfrontend` (or `compilerfrontend.exe` on Windows) with zero warnings under `-Wall -Wextra -std=c99`.
 
@@ -85,6 +121,8 @@ make test
 ```
 
 Runs every file in `tests/samples/*.txt` against its paired `*.expected` transcript and reports pass/fail. All 16 samples must pass.
+
+On Windows, `make test` needs a bash shell (Git Bash, MSYS2, or WSL) since it invokes `tests/run_tests.sh` — it won't run from plain PowerShell.
 
 To add a new sample: drop `name.txt` in `tests/samples/`, run the binary once to capture its output, save that as `tests/samples/name.expected`, then re-run `make test`. Files named `valid_*`/`eval_*` are expected to exit 0; files named `broken_*` are expected to exit 1; any name containing `eval` is run with `--eval`.
 
