@@ -1,0 +1,32 @@
+--- Tokens ---
+KEYWORD(if) LPAREN NUMBER(1) RPAREN LBRACE
+IDENTIFIER(x) OPERATOR(=) NUMBER(0)
+KEYWORD(while) LPAREN IDENTIFIER(x) OPERATOR(<) NUMBER(3) RPAREN LBRACE
+IDENTIFIER(x) OPERATOR(=) IDENTIFIER(x) OPERATOR(+) NUMBER(1)
+RBRACE
+RBRACE
+
+--- AST ---
+If
+├── Number: 1
+└── Block
+    ├── Assign
+    │   ├── Identifier: x
+    │   └── Number: 0
+    └── Block
+        └── While
+            ├── Comparison (<)
+            │   ├── Identifier: x
+            │   └── Number: 3
+            └── Block
+                └── Assign
+                    ├── Identifier: x
+                    └── BinaryExpr (+)
+                        ├── Identifier: x
+                        └── Number: 1
+
+--- Evaluation ---
+x = 0
+x = 1
+x = 2
+x = 3

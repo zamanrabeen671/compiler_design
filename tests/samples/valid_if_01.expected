@@ -1,0 +1,16 @@
+--- Tokens ---
+KEYWORD(if) LPAREN IDENTIFIER(x) OPERATOR(<) NUMBER(10) RPAREN LBRACE
+IDENTIFIER(y) OPERATOR(=) IDENTIFIER(x) OPERATOR(+) NUMBER(1)
+RBRACE
+
+--- AST ---
+If
+├── Comparison (<)
+│   ├── Identifier: x
+│   └── Number: 10
+└── Block
+    └── Assign
+        ├── Identifier: y
+        └── BinaryExpr (+)
+            ├── Identifier: x
+            └── Number: 1

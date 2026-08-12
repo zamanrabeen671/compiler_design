@@ -1,0 +1,17 @@
+--- Tokens ---
+KEYWORD(if) LPAREN NUMBER(5) OPERATOR(>) NUMBER(3) RPAREN LBRACE
+IDENTIFIER(y) OPERATOR(=) NUMBER(1)
+RBRACE
+
+--- AST ---
+If
+├── Comparison (>)
+│   ├── Number: 5
+│   └── Number: 3
+└── Block
+    └── Assign
+        ├── Identifier: y
+        └── Number: 1
+
+--- Evaluation ---
+y = 1

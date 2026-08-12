@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -g
-SRC = src/main.c src/lexer.c src/token.c src/parser.c src/ast.c src/error.c
+SRC = src/main.c src/lexer.c src/token.c src/parser.c src/ast.c src/error.c src/interpreter.c
 OBJ = $(SRC:.c=.o)
 TARGET = compilerfrontend
 

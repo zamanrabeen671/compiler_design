@@ -7,7 +7,9 @@ typedef enum {
     TOKEN_OPERATOR,
     TOKEN_LPAREN,
     TOKEN_RPAREN,
-    TOKEN_KEYWORD,   /* for if/while, stretch goal */
+    TOKEN_LBRACE,
+    TOKEN_RBRACE,
+    TOKEN_KEYWORD,   /* if/while */
     TOKEN_EOF
 } TokenType;
 

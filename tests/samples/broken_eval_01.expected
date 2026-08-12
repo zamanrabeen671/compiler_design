@@ -1,0 +1,12 @@
+--- Tokens ---
+IDENTIFIER(y) OPERATOR(=) IDENTIFIER(x) OPERATOR(+) NUMBER(1)
+
+--- AST ---
+Assign
+├── Identifier: y
+└── BinaryExpr (+)
+    ├── Identifier: x
+    └── Number: 1
+
+--- Evaluation ---
+Error (line 1, col 5): undeclared variable 'x'

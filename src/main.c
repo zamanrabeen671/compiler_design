@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "error.h"
 #include "lexer.h"
 #include "parser.h"
+#include "interpreter.h"
 
 static char *read_file(const char *path) {
     FILE *f = fopen(path, "rb");
@@ -48,6 +50,12 @@ static void print_tokens(Token *tokens, int token_count) {
             case TOKEN_RPAREN:
                 printf("RPAREN");
                 break;
+            case TOKEN_LBRACE:
+                printf("LBRACE");
+                break;
+            case TOKEN_RBRACE:
+                printf("RBRACE");
+                break;
             default:
                 printf("%s(%s)", token_type_name(t->type), t->lexeme);
                 break;
@@ -59,9 +67,11 @@ static void print_tokens(Token *tokens, int token_count) {
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <source-file>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <source-file> [--eval]\n", argv[0]);
         return 1;
     }
+
+    int do_eval = (argc >= 3 && strcmp(argv[2], "--eval") == 0);
 
     char *source = read_file(argv[1]);
 
@@ -88,8 +98,15 @@ int main(int argc, char **argv) {
     printf("\n--- AST ---\n");
     print_ast(ast, 0);
 
+    if (do_eval) {
+        printf("\n--- Evaluation ---\n");
+        eval_program(ast);
+    }
+
+    int exit_code = had_error() ? 1 : 0;
+
     free_ast(ast);
     free_tokens(tokens);
     free(source);
-    return 0;
+    return exit_code;
 }

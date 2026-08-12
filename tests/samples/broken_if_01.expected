@@ -1,0 +1,5 @@
+--- Tokens ---
+KEYWORD(if) LPAREN IDENTIFIER(x) OPERATOR(<) NUMBER(10) LBRACE
+IDENTIFIER(y) OPERATOR(=) NUMBER(1)
+RBRACE
+Error (line 1, col 12): expected ')'

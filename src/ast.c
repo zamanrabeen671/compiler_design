@@ -14,10 +14,22 @@ static void print_label(ASTNode *node) {
             printf("Identifier: %s\n", node->name);
             break;
         case NODE_BINARY_OP:
-            printf("BinaryExpr (%c)\n", node->op);
+            printf("BinaryExpr (%s)\n", node->op);
             break;
         case NODE_ASSIGN:
             printf("Assign\n");
+            break;
+        case NODE_COMPARISON:
+            printf("Comparison (%s)\n", node->op);
+            break;
+        case NODE_IF:
+            printf("If\n");
+            break;
+        case NODE_WHILE:
+            printf("While\n");
+            break;
+        case NODE_BLOCK:
+            printf("Block\n");
             break;
     }
 }

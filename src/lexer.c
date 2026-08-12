@@ -90,11 +90,31 @@ Token *tokenize(const char *source, int *token_count) {
             continue;
         }
 
-        if (c == '+' || c == '-' || c == '*' || c == '/' || c == '=') {
+        if (c == '+' || c == '-' || c == '*' || c == '/') {
             char lexeme[2] = { c, '\0' };
             push_token(&list, TOKEN_OPERATOR, lexeme, line, start_col);
             i++;
             col++;
+            continue;
+        }
+
+        if (c == '=' || c == '<' || c == '>' || c == '!') {
+            int has_eq = (i + 1 < len && source[i + 1] == '=');
+            if (has_eq) {
+                char lexeme[3] = { c, '=', '\0' };
+                push_token(&list, TOKEN_OPERATOR, lexeme, line, start_col);
+                i += 2;
+                col += 2;
+            } else if (c != '!') {
+                char lexeme[2] = { c, '\0' };
+                push_token(&list, TOKEN_OPERATOR, lexeme, line, start_col);
+                i++;
+                col++;
+            } else {
+                report_error(line, start_col, "unexpected character '!'");
+                i++;
+                col++;
+            }
             continue;
         }
 
@@ -107,6 +127,20 @@ Token *tokenize(const char *source, int *token_count) {
 
         if (c == ')') {
             push_token(&list, TOKEN_RPAREN, ")", line, start_col);
+            i++;
+            col++;
+            continue;
+        }
+
+        if (c == '{') {
+            push_token(&list, TOKEN_LBRACE, "{", line, start_col);
+            i++;
+            col++;
+            continue;
+        }
+
+        if (c == '}') {
+            push_token(&list, TOKEN_RBRACE, "}", line, start_col);
             i++;
             col++;
             continue;

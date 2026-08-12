@@ -1,0 +1,14 @@
+--- Tokens ---
+IDENTIFIER(x) OPERATOR(=) NUMBER(5) OPERATOR(+) NUMBER(3) OPERATOR(*) NUMBER(2)
+
+--- AST ---
+Assign
+├── Identifier: x
+└── BinaryExpr (+)
+    ├── Number: 5
+    └── BinaryExpr (*)
+        ├── Number: 3
+        └── Number: 2
+
+--- Evaluation ---
+x = 11

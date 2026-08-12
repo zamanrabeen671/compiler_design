@@ -26,14 +26,19 @@ for input in "$SAMPLES_DIR"/*.txt; do
         continue
     fi
 
-    actual=$("$BINARY" "$input" 2>&1)
+    case "$name" in
+        *eval*) extra_args="--eval" ;;
+        *) extra_args="" ;;
+    esac
+
+    actual=$("$BINARY" "$input" $extra_args 2>&1)
     exit_code=$?
     expected_content=$(cat "$expected")
 
     case "$name" in
-        valid_*) expected_exit=0 ;;
+        valid_*|eval_*) expected_exit=0 ;;
         broken_*) expected_exit=1 ;;
-        *) expected_exit="$exit_code" ;;
+        *) expected_exit=0 ;;
     esac
 
     if [ "$actual" == "$expected_content" ] && [ "$exit_code" -eq "$expected_exit" ]; then
