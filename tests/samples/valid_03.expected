@@ -1,0 +1,11 @@
+--- Tokens ---
+IDENTIFIER(x) OPERATOR(=) LPAREN NUMBER(5) OPERATOR(+) NUMBER(3) RPAREN OPERATOR(*) NUMBER(2)
+
+--- AST ---
+Assign
+├── Identifier: x
+└── BinaryExpr (*)
+    ├── BinaryExpr (+)
+    │   ├── Number: 5
+    │   └── Number: 3
+    └── Number: 2

@@ -1,0 +1,3 @@
+--- Tokens ---
+IDENTIFIER(x) OPERATOR(=) NUMBER(5) OPERATOR(+)
+Error (line 1, col 8): expected expression after '+'

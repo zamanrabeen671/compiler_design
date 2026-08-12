@@ -1,0 +1,7 @@
+--- Tokens ---
+IDENTIFIER(x) OPERATOR(=) NUMBER(5)
+
+--- AST ---
+Assign
+├── Identifier: x
+└── Number: 5

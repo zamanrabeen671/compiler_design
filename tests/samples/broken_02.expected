@@ -1,0 +1,3 @@
+--- Tokens ---
+IDENTIFIER(x) OPERATOR(=) LPAREN NUMBER(5) OPERATOR(+) NUMBER(2)
+Error (line 1, col 11): expected ')'
