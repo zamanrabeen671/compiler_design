@@ -50,16 +50,28 @@ No compiler ships with Windows. Pick one:
   pacman -S mingw-w64-x86_64-gcc make
   ```
 - PowerShell only, via [winget](https://learn.microsoft.com/windows/package-manager/winget/):
-  ```powershell
-  winget install -e --id BrechtSanders.WinLibs.POSIX.UCRT
-  ```
-  Add the installed `mingw64\bin` folder to PATH, then restart PowerShell.
+  1. Install the toolchain:
+     ```powershell
+     winget install -e --id BrechtSanders.WinLibs.POSIX.UCRT
+     ```
+  2. Find where it installed (typically under `C:\Program Files\WinLibs...\mingw64\bin`), then add that folder to PATH for the current session:
+     ```powershell
+     $env:PATH += ";C:\Program Files\WinLibs-x86_64-...\mingw64\bin"
+     ```
+     For a permanent change, add it via System Properties → Environment Variables, then restart PowerShell.
+  3. Verify:
+     ```powershell
+     gcc --version
+     mingw32-make --version
+     ```
 - PowerShell only, via [Chocolatey](https://chocolatey.org/):
   ```powershell
   choco install mingw -y
   ```
 
 Verify with `gcc --version` and `make --version` (or `mingw32-make --version` on Windows).
+
+> **Note:** On Windows, `make` is often not on PATH — use `mingw32-make` instead everywhere `make` is referenced below. `make test` additionally needs a bash shell (Git Bash, MSYS2, or WSL) since it runs a `.sh` script; it will not run from plain PowerShell.
 
 ## Building
 
