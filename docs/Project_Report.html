@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Compiler Frontend — Final Year Project Report</title>
+<style>
+  :root{
+    --navy:#1a3c6e;
+    --navy-dark:#132c50;
+    --accent:#2f6fb0;
+    --callout-bg:#eef5fc;
+    --callout-border:#2f6fb0;
+    --row-alt:#f4f7fb;
+    --border:#d5dde6;
+    --text:#22282f;
+    --muted:#5b6675;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family: Georgia, 'Times New Roman', serif;
+    color:var(--text);
+    line-height:1.55;
+    max-width:850px;
+    margin:0 auto;
+    padding:2rem 2.5rem 4rem;
+    background:#fff;
+    font-size:15.5px;
+  }
+  h1,h2,h3,h4{ font-family: Arial, Helvetica, sans-serif; color:var(--navy); }
+  .titlepage{ text-align:center; padding-top:2rem; page-break-after: always; }
+  .titlepage .dept{ font-size:1.3rem; font-weight:bold; color:var(--navy); text-transform:uppercase; margin-bottom:.2rem;}
+  .titlepage .univ{ font-size:1rem; color:var(--muted); margin-bottom:1.5rem;}
+  .titlebox{ border-top:3px solid var(--navy); border-bottom:3px solid var(--navy); background:var(--callout-bg); padding:1.5rem 1rem; margin:1.5rem 0;}
+  .titlebox h1{ font-size:1.6rem; margin:.3rem 0; letter-spacing:.5px;}
+  .titlebox .sub{ font-style:italic; color:var(--muted); font-family:Georgia, serif;}
+  .submitted{ margin:1.8rem 0; font-size:.95rem;}
+  .submitted b{ display:block; margin-top:.3rem;}
+  .byrow{ display:flex; justify-content:space-between; text-align:left; margin-top:2.5rem; font-size:.92rem;}
+  .byrow .col{ width:48%; }
+  .byrow .label{ font-weight:bold; color:var(--navy); font-family:Arial,sans-serif; font-size:.85rem; margin-bottom:.4rem;}
+  .byrow p{ margin:.15rem 0; }
+  .month{ margin-top:2.5rem; font-weight:bold; letter-spacing:.5px; font-size:.9rem; color:var(--muted);}
+  .page{ padding-top:.5rem; }
+  .chapter-start{ page-break-before: always; }
+  table, svg, pre{ page-break-inside: avoid; }
+  h1.chapter{ page-break-after: avoid; }
+  h1.chapter{ font-size:1.35rem; border-bottom:2px solid var(--border); padding-bottom:.4rem; margin-top:0;}
+  h2.section{ font-size:1.1rem; color:var(--accent); border-bottom:1px solid var(--border); padding-bottom:.25rem; }
+  .callout{ background:var(--callout-bg); border-left:4px solid var(--callout-border); padding:.8rem 1rem; margin:1rem 0; font-size:.92rem;}
+  .callout .lbl{ font-weight:bold; font-family:Arial,sans-serif; color:var(--navy); font-size:.85rem; margin-bottom:.3rem;}
+  table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:.88rem; }
+  th{ background:var(--navy); color:#fff; text-align:left; padding:.5rem .6rem; font-family:Arial,sans-serif; font-weight:600;}
+  td{ padding:.5rem .6rem; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:nth-child(even) td{ background:var(--row-alt); }
+  .pill{ display:inline-block; background:#e3ecf5; color:var(--navy); border-radius:3px; padding:.1rem .5rem; font-size:.8rem; font-weight:bold; font-family:Arial,sans-serif;}
+  .pass{ color:#1a7a3c; font-weight:bold; }
+  code, pre{ font-family: Consolas, 'Courier New', monospace; font-size:.85rem; }
+  pre{ background:#f4f7fb; border:1px solid var(--border); padding:.8rem 1rem; overflow-x:auto; border-radius:3px;}
+  .toc-table td{ font-size:.9rem; }
+  .toc-table td.sec{ width:12%; }
+  .toc-table td.pg{ width:10%; text-align:right; }
+  .toc-table tr.chap td{ font-weight:bold; }
+  footer.pagefoot{ display:flex; justify-content:space-between; color:var(--muted); font-size:.75rem; font-family:Arial,sans-serif; border-top:1px solid var(--border); padding-top:.4rem; margin-top:2rem;}
+  ul, ol{ margin:.5rem 0; padding-left:1.4rem;}
+  li{ margin:.25rem 0; }
+  .signline{ margin-top:2.5rem; border-top:1px solid var(--text); width:60%; padding-top:.3rem; font-size:.85rem;}
+  .id-mono{ font-family: Consolas, 'Courier New', monospace; color:#5b7a99; letter-spacing:.3px; }
+  .id-mono-1{ font-family: Consolas, 'Courier New', monospace; color:#101111; letter-spacing:.3px; }
+  .submitted-by{ margin-top:1.8rem; text-align:left; }
+  .submitted-by .label{ font-weight:bold; color:var(--navy); font-family:Arial,sans-serif; font-size:.85rem; margin-bottom:.5rem;}
+  .member-row{ display:flex; align-items:center; border-bottom:1px solid var(--border); }
+  .member-row:first-of-type{ border-top:1px solid var(--border); }
+  .member-num{ background:var(--navy); color:#fff; font-family:Arial,sans-serif; font-weight:bold; font-size:.85rem; width:34px; text-align:center; align-self:stretch; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .member-name{ flex:1; padding:.5rem .8rem; font-size:.92rem; }
+  .member-id{ padding:.5rem .8rem; font-size:.88rem; text-align:right; }
+  .supervised-by{ margin-top:1.8rem; text-align:left; }
+  .supervised-by .label{ font-weight:bold; color:var(--navy); font-family:Arial,sans-serif; font-size:.85rem; margin-bottom:.4rem;}
+  .diagram-caption{ text-align:center; font-size:.85rem; color:var(--muted); font-style:italic; margin-top:.3rem;}
+  svg text{ font-family: Arial, Helvetica, sans-serif; }
+  @media print{
+    body{ padding:0 1cm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: TITLE PAGE -->
+<section class="page titlepage">
+  <div class="dept">Department of Computer Science and Engineering</div>
+  <div class="univ">Northern University of Bangladesh</div>
+
+  <div class="titlebox">
+    <h1>COMPILER FRONTEND</h1>
+    <h2>A Lexer, Parser &amp; AST Generator Built From Scratch in C</h2>
+  </div>
+
+  <div class="submitted">
+    A Lab Final Project Report submitted in partial fulfillment<br>
+    of the requirements for the course
+    <b>Compiler Design Lab <span class="id-mono-1">CSE 3272</span></b>
+  </div>
+
+  <div class="byrow">
+    <div class="col">
+      <div class="label">PREPARED BY</div>
+      <p><b>Md Kamruzzaman</b> (<span class="id-mono">ID: 42240301975</span>) — Lexer Core &amp; Integration</p>
+      <p><b>Mubarak Hossain</b> (<span class="id-mono">ID: 42240301995</span>) — Lexer Support</p>
+      <p><b>Abdullah Al Noman</b> (<span class="id-mono">ID: 42240301964</span>) — Parser Core</p>
+      <p><b>Sadit Al Islam</b> (<span class="id-mono">ID: 42240301963</span>) — Parser Extensions &amp; AST</p>
+      <p><b>Soad Mahmud</b> (<span class="id-mono">ID: 42240301962</span>) — AST Visualization</p>
+      <p><b>Asraful Islam</b> (<span class="id-mono">ID: 42240302008</span>) — Error Handling &amp; QA</p>
+    </div>
+    <div class="col">
+      <div class="label">SUPERVISED BY</div>
+      <p><b>Sharika Khan</b></p>
+      <p>Lecturer</p>
+      <p>Department of Computer Science and Engineering</p>
+    </div>
+  </div>
+
+  <div class="month">SUBMISSION DATE: <span class="id-mono">21/08/2026</span></div>
+</section>
+
+<!-- ABSTRACT / KEYWORDS / ACKNOWLEDGMENTS (template page 3) -->
+<section class="page">
+  <h1 class="chapter">ABSTRACT</h1>
+  <p>
+  This project presents the design and implementation of a compiler frontend for a small
+  imperative expression language, built entirely from scratch in C99 with no external
+  dependencies. The system covers the first two classical phases of compilation — lexical
+  analysis and syntax analysis — and extends beyond the core deliverable into semantic
+  evaluation. A hand-written scanner converts raw source text into a stream of typed tokens
+  while tracking line and column position for diagnostics. A recursive-descent parser then
+  consumes this stream and builds an Abstract Syntax Tree (AST) that correctly encodes
+  operator precedence and associativity for arithmetic expressions, assignment statements,
+  and — as an extension — <code>if</code> and <code>while</code> control structures with
+  block scoping. Malformed input is never allowed to crash the program: every grammar
+  production has a corresponding error case that reports a precise line/column location and
+  a human-readable message before exiting with a non-zero status. As a stretch goal, a
+  tree-walking interpreter (invoked with the <code>--eval</code> flag) evaluates the AST
+  directly, maintaining a runtime symbol table and reporting undeclared-variable references
+  as semantic errors rather than crashes. The project was developed by a team of six members,
+  each owning a distinct module (lexer core, lexer support, parser core, parser/AST
+  extensions, AST visualization, and error handling/QA), coordinated through a shared grammar
+  and function-signature contract agreed on before implementation began. Correctness was
+  validated using an automated regression harness of 16 paired input/expected-output samples
+  covering valid programs, syntax errors, control-flow constructs, and interpreter semantics,
+  all of which pass under <code>make test</code>. The resulting artifact is a compact,
+  dependency-free reference implementation that demonstrates the complete pipeline from
+  source text to executable behaviour, and serves as a practical foundation for exploring
+  further compiler phases such as static typing and code generation.
+  </p>
+  <p><b>Keywords:</b> Compiler Design, Lexical Analysis, Recursive-Descent Parsing,
+  Abstract Syntax Tree, Tree-Walking Interpreter, Error Recovery, Symbol Table</p>
+
+  <h1 class="chapter" style="margin-top:2.5rem;">ACKNOWLEDGMENTS</h1>
+  <p>
+  We would like to express our sincere gratitude to <b>Sharika Khan</b>, Lab Instructor, for guidance
+  and feedback throughout the design and implementation of this project, and to the
+  Department of Computer Science and Engineering, Northern University of Bangladesh, for
+  providing the lab facilities and course structure (CSE 3272 — Compiler Design Lab) that
+  made this work possible. We also thank our fellow classmates for their support during
+  integration testing and demo rehearsal.
+  </p>
+</section>
+
+<!-- TABLE OF CONTENTS -->
+<section class="page">
+  <h1 class="chapter chapter-start">TABLE OF CONTENTS</h1>
+  <table class="toc-table">
+    <tr><th style="width:12%">Section</th><th>Title / Chapter Name</th><th style="width:10%">Page</th></tr>
+    <tr class="chap"><td>1.0</td><td>Introduction</td><td class="pg">1</td></tr>
+    <tr><td>1.1</td><td>Project Background</td><td class="pg">1</td></tr>
+    <tr><td>1.2</td><td>Problem Statement</td><td class="pg">1</td></tr>
+    <tr><td>1.3</td><td>Objectives</td><td class="pg">2</td></tr>
+    <tr><td>1.4</td><td>Scope and Limitations</td><td class="pg">2</td></tr>
+    <tr class="chap"><td>2.0</td><td>Literature Review &amp; Related Work</td><td class="pg">3</td></tr>
+    <tr><td>2.1</td><td>Theoretical Background</td><td class="pg">3</td></tr>
+    <tr><td>2.2</td><td>Comparative Evaluation of Existing Approaches</td><td class="pg">4</td></tr>
+    <tr class="chap"><td>3.0</td><td>System Design &amp; Methodology</td><td class="pg">5</td></tr>
+    <tr><td>3.1</td><td>System Architecture &amp; Pipeline Diagram</td><td class="pg">5</td></tr>
+    <tr><td>3.2</td><td>Hardware / Software Requirements</td><td class="pg">6</td></tr>
+    <tr><td>3.3</td><td>Grammar, Algorithms &amp; Workflow Design</td><td class="pg">6</td></tr>
+    <tr class="chap"><td>4.0</td><td>Implementation &amp; Testing</td><td class="pg">7</td></tr>
+    <tr><td>4.1</td><td>System Development &amp; Setup</td><td class="pg">7</td></tr>
+    <tr><td>4.2</td><td>Testing Strategy &amp; Experimental Results</td><td class="pg">8</td></tr>
+    <tr class="chap"><td>5.0</td><td>Conclusion &amp; Future Work</td><td class="pg">9</td></tr>
+    <tr><td>5.1</td><td>Summary of Contributions</td><td class="pg">9</td></tr>
+    <tr><td>5.2</td><td>Future Scope</td><td class="pg">9</td></tr>
+    <tr class="chap"><td>-</td><td>References</td><td class="pg">10</td></tr>
+  </table>
+</section>
+
+<!-- CHAPTER 1 -->
+<section class="page">
+  <h1 class="chapter chapter-start">CHAPTER 1: INTRODUCTION</h1>
+
+  <h2 class="section">1.1 Project Background</h2>
+  <p>
+  Every compiler, regardless of the source language or target platform, begins with the same
+  two front-end phases: lexical analysis, which groups raw characters into meaningful tokens,
+  and syntax analysis, which arranges those tokens into a structure — typically an Abstract
+  Syntax Tree (AST) — that reflects the grammar and precedence rules of the language. These
+  phases are foundational to compiler theory and are the basis on which every later phase
+  (semantic analysis, optimization, and code generation) is built. Understanding them in
+  the abstract is straightforward; implementing them correctly, with no crashes on malformed
+  input and precise diagnostics, is a different and more demanding exercise. This project
+  builds that frontend from first principles in C, deliberately avoiding parser-generator
+  tools (such as Lex/Yacc) or external libraries, so that every stage of the pipeline —
+  scanning, tokenizing, precedence-aware parsing, tree construction, and evaluation — is
+  visible and owned by the team.
+  </p>
+
+  <h2 class="section">1.2 Problem Statement</h2>
+  <p>
+  Compiler theory taught in isolation from implementation leaves a gap: students can describe
+  what a recursive-descent parser does but often have not had to handle the many edge cases
+  that separate a toy parser from a robust one — unexpected end-of-file, unmatched
+  parentheses, unrecognized characters, and undeclared-variable references at evaluation
+  time. Existing classroom examples frequently either omit error handling entirely (and
+  crash on bad input) or only illustrate a single phase in isolation. This project addresses
+  that gap by delivering a small but complete pipeline — from source text to an evaluated
+  result — where every grammar production has a defined, non-crashing error path with
+  line/column reporting, and where the design is validated against an automated,
+  repeatable test suite rather than manual inspection alone.
+  </p>
+
+  <h2 class="section">1.3 Objectives</h2>
+  <ul>
+    <li><b>Primary Objective:</b> Design and implement a compiler frontend (lexer, recursive-descent
+    parser, and AST) for a small expression/assignment language with correctly enforced
+    operator precedence and associativity.</li>
+    <li><b>Secondary Objective 1:</b> Extend the grammar to support <code>if</code> and
+    <code>while</code> control structures with block scoping, without weakening the
+    guarantees of the original core grammar.</li>
+    <li><b>Secondary Objective 2:</b> Implement a tree-walking interpreter with a runtime
+    symbol table that evaluates the AST, detects undeclared-variable references as semantic
+    errors, and validate the entire pipeline against an automated regression suite of
+    paired input/expected-output samples.</li>
+  </ul>
+
+  <h2 class="section">1.4 Scope and Limitations</h2>
+  <p><span class="pill">Scope</span> Lexical analysis (identifiers, integer literals,
+  operators, parentheses, keywords, comparison operators); recursive-descent parsing of
+  arithmetic expressions, assignment statements, and <code>if</code>/<code>while</code>
+  blocks; AST construction and tree-printing; line/column-aware error reporting for every
+  grammar production; a tree-walking interpreter with a variable symbol table; and an
+  automated test harness covering 16 valid, broken, and evaluation samples.</p>
+  <p><span class="pill">Limitations</span> The language deliberately excludes functions and
+  procedures, a static type system, string and array data types, and code generation to
+  machine code or bytecode. The top level accepts exactly one statement (which may itself be
+  an <code>if</code>/<code>while</code> whose block holds many statements), preserving the
+  guarantees of the original single-statement core grammar rather than introducing
+  multi-statement programs.</p>
+</section>
+
+<!-- CHAPTER 2 -->
+<section class="page">
+  <h1 class="chapter chapter-start">CHAPTER 2: LITERATURE REVIEW</h1>
+
+  <h2 class="section">2.1 Theoretical Background</h2>
+  <p>
+  The structure of this project follows the classical front-end model described in
+  compiler-construction literature (e.g., Aho, Lam, Sethi &amp; Ullman's <i>Compilers:
+  Principles, Techniques, and Tools</i>, and Nystrom's <i>Crafting Interpreters</i>): source
+  text is first reduced to a token stream by a scanner, then structured into a syntax tree
+  by a parser that encodes grammar rules directly as functions. This project uses
+  recursive-descent parsing, where operator precedence is enforced purely by the calling
+  order of parser functions — <code>parse_factor()</code> is invoked from
+  <code>parse_term()</code>, which is invoked from <code>parse_expr()</code> — rather than by
+  a table-driven or generator-produced parser. The AST produced by this stage acts as an
+  intermediate representation that is independent of both the original text and any specific
+  execution strategy, which is what allows the same tree to be either printed (for
+  inspection) or walked directly by a tree-walking interpreter, the simplest of the classical
+  evaluation strategies (as opposed to compiling to bytecode for a virtual machine or to
+  native code).
+  </p>
+
+  <h2 class="section">2.2 Comparative Evaluation of Existing Approaches</h2>
+  <table>
+    <tr><th>Approach</th><th>Methodology Used</th><th>Key Advantages</th><th>Identified Limitations</th></tr>
+    <tr>
+      <td>Parser-generator tools<br><span style="color:var(--muted)">(e.g., Lex/Yacc, ANTLR)</span></td>
+      <td>Grammar specification compiled into a table-driven scanner/parser</td>
+      <td>Fast to bootstrap for large grammars; well-tested core algorithms</td>
+      <td>Adds a build-time dependency; generated code obscures how precedence and error
+      recovery actually work — poor fit for a learning-focused project</td>
+    </tr>
+    <tr>
+      <td>High-level scripting frameworks<br><span style="color:var(--muted)">(e.g., Python's <code>tokenize</code>/<code>ast</code>)</span></td>
+      <td>Reuses a mature, host-language-provided lexer/parser/AST toolchain</td>
+      <td>Very high productivity; rich existing tooling (visitors, transformers)</td>
+      <td>Hides the implementation entirely inside the host runtime; unsuitable for
+      demonstrating manual token scanning and grammar-to-code mapping</td>
+    </tr>
+    <tr>
+      <td><b>Proposed Project</b><br><span style="color:var(--muted)">(hand-written, dependency-free C)</span></td>
+      <td>Hand-written character-by-character scanner and recursive-descent parser,
+      each grammar rule mapped one-to-one onto a parser function</td>
+      <td>Every phase is transparent and owned by the team; precise control over error
+      messages and line/column tracking; zero external dependencies</td>
+      <td>Requires more manual effort to extend the grammar (e.g., adding new operators or
+      statement forms) than a generator-based approach</td>
+    </tr>
+  </table>
+</section>
+
+<!-- CHAPTER 3 -->
+<section class="page">
+  <h1 class="chapter chapter-start">CHAPTER 3: SYSTEM DESIGN &amp; METHODOLOGY</h1>
+
+  <h2 class="section">3.1 System Architecture &amp; Pipeline Diagram</h2>
+  <p>
+  The system is organized as a linear pipeline with a cross-cutting error-handling module
+  that any stage can invoke. A source file is read into memory, tokenized by the lexer,
+  parsed into an AST by the recursive-descent parser, and then either printed (default) or
+  evaluated by the tree-walking interpreter when the <code>--eval</code> flag is supplied.
+  Any stage that detects a malformed input reports through the shared error module and the
+  program exits with a non-zero status instead of crashing.
+  </p>
+
+  <svg viewBox="0 0 860 300" width="100%" style="max-width:820px;display:block;margin:1rem auto;" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#1a3c6e"/>
+      </marker>
+    </defs>
+
+    <!-- main pipeline row -->
+    <g font-size="13" fill="#132c50">
+      <rect x="10" y="40" width="110" height="55" rx="6" fill="#eef5fc" stroke="#2f6fb0"/>
+      <text x="65" y="63" text-anchor="middle" font-weight="bold">Source</text>
+      <text x="65" y="80" text-anchor="middle" font-size="11">(.txt file)</text>
+
+      <rect x="160" y="40" width="130" height="55" rx="6" fill="#eef5fc" stroke="#2f6fb0"/>
+      <text x="225" y="63" text-anchor="middle" font-weight="bold">Lexer</text>
+      <text x="225" y="80" text-anchor="middle" font-size="11">tokenize()</text>
+
+      <rect x="330" y="40" width="140" height="55" rx="6" fill="#eef5fc" stroke="#2f6fb0"/>
+      <text x="400" y="63" text-anchor="middle" font-weight="bold">Token Stream</text>
+      <text x="400" y="80" text-anchor="middle" font-size="11">Token[ ]</text>
+
+      <rect x="510" y="40" width="130" height="55" rx="6" fill="#eef5fc" stroke="#2f6fb0"/>
+      <text x="575" y="63" text-anchor="middle" font-weight="bold">Parser</text>
+      <text x="575" y="80" text-anchor="middle" font-size="11">parse()</text>
+
+      <rect x="680" y="40" width="150" height="55" rx="6" fill="#eef5fc" stroke="#2f6fb0"/>
+      <text x="755" y="63" text-anchor="middle" font-weight="bold">AST</text>
+      <text x="755" y="80" text-anchor="middle" font-size="11">ASTNode tree</text>
+
+      <!-- arrows -->
+      <line x1="120" y1="67" x2="158" y2="67" stroke="#1a3c6e" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="290" y1="67" x2="328" y2="67" stroke="#1a3c6e" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="470" y1="67" x2="508" y2="67" stroke="#1a3c6e" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="640" y1="67" x2="678" y2="67" stroke="#1a3c6e" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- branch down from AST -->
+      <line x1="755" y1="95" x2="755" y2="130" stroke="#1a3c6e" stroke-width="2"/>
+      <line x1="755" y1="130" x2="620" y2="130" stroke="#1a3c6e" stroke-width="2"/>
+      <line x1="755" y1="130" x2="620" y2="130" stroke="#1a3c6e" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="755" y1="130" x2="330" y2="130" stroke="#1a3c6e" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <rect x="480" y="150" width="140" height="55" rx="6" fill="#eef5fc" stroke="#2f6fb0"/>
+      <text x="550" y="173" text-anchor="middle" font-weight="bold">Tree Printer</text>
+      <text x="550" y="190" text-anchor="middle" font-size="11">print_ast()</text>
+
+      <rect x="180" y="150" width="150" height="55" rx="6" fill="#eef5fc" stroke="#2f6fb0"/>
+      <text x="255" y="168" text-anchor="middle" font-weight="bold">Interpreter</text>
+      <text x="255" y="183" text-anchor="middle" font-size="11">eval() + symbol table</text>
+      <text x="255" y="197" text-anchor="middle" font-size="10" fill="#5b6675">( --eval flag )</text>
+
+      <line x1="550" y1="205" x2="550" y2="235" stroke="#1a3c6e" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="255" y1="205" x2="255" y2="235" stroke="#1a3c6e" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <rect x="330" y="235" width="220" height="45" rx="6" fill="#f4f7fb" stroke="#8a97a8"/>
+      <text x="440" y="263" text-anchor="middle" font-weight="bold" font-size="12">stdout — Tokens / AST / Evaluation</text>
+
+      <!-- error handling module, cross-cutting -->
+      <rect x="180" y="0" width="470" height="0" fill="none"/>
+      <rect x="330" y="0" width="0" height="0"/>
+      <rect x="10" y="130" width="140" height="65" rx="6" fill="#fdeeee" stroke="#c0453f"/>
+      <text x="80" y="153" text-anchor="middle" font-weight="bold" fill="#8a231c">Error Handler</text>
+      <text x="80" y="169" text-anchor="middle" font-size="10.5" fill="#8a231c">report_error()</text>
+      <text x="80" y="183" text-anchor="middle" font-size="10.5" fill="#8a231c">line / column / message</text>
+
+      <line x1="150" y1="150" x2="178" y2="150" stroke="#c0453f" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+      <line x1="80" y1="130" x2="80" y2="97" stroke="#c0453f" stroke-width="2" stroke-dasharray="4 3"/>
+      <line x1="80" y1="97" x2="225" y2="97" stroke="#c0453f" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+      <line x1="80" y1="97" x2="575" y2="97" stroke="#c0453f" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+      <rect x="10" y="235" width="220" height="45" rx="6" fill="#fdeeee" stroke="#c0453f"/>
+      <text x="120" y="257" text-anchor="middle" font-weight="bold" font-size="11" fill="#8a231c">stderr — Error(line,col): message</text>
+      <text x="120" y="271" text-anchor="middle" font-size="10" fill="#8a231c">exit code ≠ 0</text>
+      <line x1="80" y1="195" x2="120" y2="233" stroke="#c0453f" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+    </g>
+  </svg>
+  <p class="diagram-caption">Fig. 3.1 — Compiler frontend pipeline: source → lexer → token stream →
+  parser → AST → tree printer / interpreter, with the error-handling module (dashed) reachable
+  from every stage.</p>
+
+  <h2 class="section">3.2 Hardware / Software Requirements</h2>
+  <table>
+    <tr><th>Category</th><th>Item</th><th>Specification / Version</th></tr>
+    <tr><td>Hardware</td><td>Development machine</td><td>Any standard PC/laptop (Windows, Linux, or macOS) — no special hardware required</td></tr>
+    <tr><td>Software</td><td>Compiler</td><td>GCC (or Clang), C99 standard, built with <code>-Wall -Wextra -std=c99</code></td></tr>
+    <tr><td>Software</td><td>Build tool</td><td>GNU Make (<code>mingw32-make</code> on Windows without MSYS2)</td></tr>
+    <tr><td>Software</td><td>Shell / test runner</td><td>Bash (Git Bash / MSYS2 / WSL on Windows) for <code>tests/run_tests.sh</code></td></tr>
+    <tr><td>Software</td><td>Version control</td><td>Git</td></tr>
+    <tr><td>Software</td><td>Dependencies</td><td>None — standard C library only</td></tr>
+  </table>
+
+  <h2 class="section">3.3 Grammar, Algorithms &amp; Workflow Design</h2>
+  <pre>statement   → assign_stmt | if_stmt | while_stmt
+assign_stmt → IDENTIFIER '=' expr
+if_stmt     → 'if' '(' condition ')' block
+while_stmt  → 'while' '(' condition ')' block
+block       → '{' statement* '}'
+condition   → expr (('&lt;' | '&gt;' | '&lt;=' | '&gt;=' | '==' | '!=') expr)?
+expr        → term (('+' | '-') term)*
+term        → factor (('*' | '/') factor)*
+factor      → NUMBER | IDENTIFIER | '(' expr ')'</pre>
+  <p>
+  Each grammar rule maps directly onto a parser function, so precedence is enforced purely by
+  the call chain <code>parse_factor() → parse_term() → parse_expr()</code>: multiplication and
+  division bind tighter than addition and subtraction because <code>parse_factor</code> is
+  invoked from inside <code>parse_term</code>, which is invoked from inside
+  <code>parse_expr</code>. The interpreter walks the resulting AST directly, using an
+  array-based symbol table (variable name → integer value) populated on assignment; looking up
+  a name that has not yet been assigned raises a semantic error reported with line/column
+  rather than an undefined-behaviour crash. Every parser production that can fail (missing
+  <code>)</code>, missing identifier, unexpected token/EOF, unrecognized character) has a
+  matching error case wired through <code>report_error()</code>.
+  </p>
+</section>
+
+<!-- CHAPTER 4 -->
+<section class="page">
+  <h1 class="chapter chapter-start">CHAPTER 4: IMPLEMENTATION &amp; TESTING</h1>
+
+  <h2 class="section">4.1 Implementation Workflow</h2>
+  <p>
+  <code>main.c</code> wires the full pipeline: it reads the input filename from
+  <code>argv</code>, loads the file into a buffer, calls <code>tokenize()</code> and prints
+  the <code>--- Tokens ---</code> block, checks <code>had_error()</code> before proceeding,
+  calls <code>parse()</code> and prints the <code>--- AST ---</code> block via
+  <code>print_ast()</code>, checks <code>had_error()</code> again, and — if the
+  <code>--eval</code> flag is present — hands the AST to the interpreter, which prints an
+  <code>--- Evaluation ---</code> block as each assignment executes. <code>free_tokens()</code>
+  and <code>free_ast()</code> release all heap memory before exit; the program returns exit
+  code 0 on success and non-zero on any reported error. Development proceeded through seven
+  milestones (M1–M7): scaffolding and core types, the lexer, the parser and AST, integration
+  and error handling, the test suite, and the two stretch goals — <code>if</code>/<code>while</code>
+  control flow and the tree-walking interpreter — each merged only after the previous milestone
+  was fully green. Work was split across six team members, each owning one module (lexer core,
+  lexer support, parser core, parser/AST extensions, AST visualization, and error
+  handling/QA), coordinated by agreeing on shared structs and function signatures before
+  implementation began so that all six could work in parallel without blocking one another.
+  </p>
+
+  <h2 class="section">4.2 Testing Strategy &amp; Experimental Results</h2>
+  <p>
+  Correctness is validated with a regression harness (<code>make test</code> /
+  <code>tests/run_tests.sh</code>) that runs every <code>.txt</code> file in
+  <code>tests/samples/</code> and diffs the actual output against a paired
+  <code>.expected</code> transcript. The suite covers 16 samples across four categories: valid
+  arithmetic/assignment programs, syntax-error programs, control-flow (<code>if</code>/<code>while</code>)
+  programs (valid and broken), and interpreter-evaluation programs (valid and semantically
+  broken). All 16 samples pass.
+  </p>
+  <table>
+    <tr><th>Test Case ID</th><th>Input Scenario</th><th>Expected Output</th><th>Observed Output</th><th>Status</th></tr>
+    <tr>
+      <td>TC-001</td>
+      <td>Nested arithmetic: <code>x = 5 + y * (2 - 1)</code></td>
+      <td>AST reflects <code>*</code>/<code>/</code> binding tighter than <code>+</code>/<code>-</code></td>
+      <td><code>Assign → Identifier: x, BinaryExpr(+) → Number:5, BinaryExpr(*) → …</code></td>
+      <td class="pass">PASSED</td>
+    </tr>
+    <tr>
+      <td>TC-002</td>
+      <td>Truncated expression: <code>x = 5 +</code></td>
+      <td>Clear syntax error, no crash</td>
+      <td><code>Error (line 1, col 8): expected expression after '+'</code>, exit ≠ 0</td>
+      <td class="pass">PASSED</td>
+    </tr>
+    <tr>
+      <td>TC-003</td>
+      <td>Malformed <code>if</code>: missing closing paren, <code>if (x &lt; 10 { … }</code></td>
+      <td>Error naming the missing <code>)</code>, no crash</td>
+      <td><code>Error (line 1, col 12): expected ')'</code></td>
+      <td class="pass">PASSED</td>
+    </tr>
+    <tr>
+      <td>TC-004</td>
+      <td>Nested control flow with <code>--eval</code>: <code>if (1) { x = 0; while (x &lt; 3) { x = x + 1 } }</code></td>
+      <td>Loop executes 3 times; each assignment printed in order</td>
+      <td><code>x = 0 / x = 1 / x = 2 / x = 3</code></td>
+      <td class="pass">PASSED</td>
+    </tr>
+    <tr>
+      <td>TC-005</td>
+      <td>Undeclared variable with <code>--eval</code>: <code>y = x + 1</code></td>
+      <td>Semantic error with line/column, not a crash</td>
+      <td><code>Error (line 1, col 5): undeclared variable 'x'</code></td>
+      <td class="pass">PASSED</td>
+    </tr>
+  </table>
+  <p>
+  Beyond the automated suite, the build itself was verified to compile with zero warnings
+  under <code>-Wall -Wextra -std=c99</code>, and debug builds were spot-checked for memory
+  leaks around <code>free_tokens()</code>/<code>free_ast()</code> during milestone reviews.
+  </p>
+</section>
+
+<!-- CHAPTER 5 -->
+<section class="page">
+  <h1 class="chapter chapter-start">CHAPTER 5: CONCLUSION &amp; FUTURE SCOPE</h1>
+
+  <h2 class="section">5.1 Summary of Contributions</h2>
+  <p>
+  This project delivered a complete, dependency-free compiler frontend in C: a lexer with
+  accurate line/column tracking, a recursive-descent parser that correctly enforces operator
+  precedence and associativity, an AST with a readable tree-printer, and a crash-free error
+  path for every grammar production. Both stretch goals defined in the original project
+  specification were also completed — <code>if</code>/<code>while</code> control structures
+  with block scoping, and a tree-walking interpreter with a symbol table and undeclared-variable
+  detection — meaning all seven planned milestones (M1–M7) were reached, not just the core MVP
+  (M1–M5). The result meets every objective stated in Section 1.3: a working frontend,
+  extended control-flow support, and a validated evaluator, all backed by a 16-sample automated
+  regression suite that runs in seconds via <code>make test</code>.
+  </p>
+
+  <h2 class="section">5.2 Future Scope</h2>
+  <ul>
+    <li>Adding function/procedure definitions and calls, requiring a proper call stack and scoping model.</li>
+    <li>Introducing a static type system and type-checking pass ahead of evaluation.</li>
+    <li>Supporting string and array data types beyond the current integer-only model.</li>
+    <li>Compiling the AST to bytecode for a small virtual machine (or to LLVM IR) instead of tree-walking, to explore code-generation and performance trade-offs.</li>
+    <li>Adding a REPL mode for interactive experimentation alongside the current file-based interface.</li>
+  </ul>
+
+  <h1 class="chapter" style="margin-top:2.5rem;">REFERENCES</h1>
+  <ol>
+    <li>A. V. Aho, M. S. Lam, R. Sethi, and J. D. Ullman, <i>Compilers: Principles, Techniques, and Tools</i>, 2nd ed., Pearson, 2006.</li>
+    <li>R. Nystrom, <i>Crafting Interpreters</i>, self-published, 2021. Available: https://craftinginterpreters.com</li>
+    <li>Project design specification: <code>docs/Compiler_design_architecture.md</code>, this repository.</li>
+    <li>Implementation milestone plan: <code>docs/MILESTONES.md</code>, this repository.</li>
+    <li>Project source code repository: <a href="https://github.com/zamanrabeen671/compiler_design">https://github.com/zamanrabeen671/compiler_design</a></li>
+  </ol>
+</section>
+
+</body>
+</html>
